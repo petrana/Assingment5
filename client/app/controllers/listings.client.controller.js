@@ -13,6 +13,23 @@ angular.module('listings').controller('ListingsController', ['$scope', '$locatio
         $scope.error = 'Unable to retrieve listings!\n' + error;
       });
     };
+    scope.findListingsWithCoords = function(){
+      $scope.loading = true;
+      // Get all the listings that have coordinates
+      Listings.getAll().then(function(response){
+        $scope.loading = false;
+        $scope.listings = [];
+        response.data.forEach(function(listing){
+          if(listing.coordinates){
+            $scope.listings.push(listing);
+          }
+        });
+
+      }, function(error){
+        $scope.loading = false;
+        $scope.error = "Unable to retrieve listings!\n + error";
+      });
+    };
 
     $scope.findOne = function() {
       debugger;
@@ -83,16 +100,14 @@ angular.module('listings').controller('ListingsController', ['$scope', '$locatio
          // $scope.$broadcast('show-errors-check-validity', 'articleForm');
          // return false;
        // }
-      var listing = {
-      name: $scope.name, 
-      code: $scope.code, 
-      address: $scope.address
-      };
-      Listings.update(listing).then(function(response) {
-                $state.go('listings.list', { successMessage: 'Listing succesfully updated!' });
-              }, function(error) {
-                $scope.error = 'Unable to update listing!\n' + error;
-              });
+      if(isValid){
+         var id = $stateParams.listingId;
+         Listings.update(id, $scope.listing).then(function(response){
+           $state.go('listings.list', {successMessage: 'Listing succesfully updated!'});
+         }, function(error){
+           $scope.error = "Unable to update listing!\n" + error;
+         });
+       }
     };
 
     $scope.remove = function() {
